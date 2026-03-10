@@ -2,34 +2,49 @@ version: "3.9"
 
 services:
 
-  frontend:
-    build: ./frontend
-    ports:
-      - "3000:3000"
+  # frontend:
+  #   build: ./frontend
+  #   ports:
+  #     - "3000:3000"
 
   backend:
     build: ./backend
     ports:
       - "5000:5000"
+    environment:
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_USER=postgres
+      - DB_PASS=postgres
+      - DB_NAME=ecommerce
     depends_on:
       - db
       - redis
 
   db:
     image: postgres:15
+    container_name: iluminaria-db
     environment:
       POSTGRES_DB: ecommerce
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
     ports:
       - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
 
   redis:
     image: redis:7
+    container_name: iluminaria-redis
 
   nginx:
-    image: nginx
+    image: nginx:latest
     ports:
       - "80:80"
     volumes:
       - ./docker/nginx.conf:/etc/nginx/nginx.conf
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:
